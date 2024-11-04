@@ -8,3 +8,6 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+# Ignore let's encrypt certificates data
+acme.json

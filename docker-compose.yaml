@@ -1,0 +1,62 @@
+services:
+  caddy:
+    build:
+      context: .
+      dockerfile: Dockerfile.caddy
+#    ports:
+#      - "80:80"
+#      - "443:443"
+#      - "443:443/udp"
+    depends_on:
+      - php-fpm
+    environment:
+      CLOUDFLARE_AUTH_TOKEN: ${CLOUDFLARE_AUTH_TOKEN}
+    labels:
+      - traefik.enable=true
+      - traefik.tcp.routers.caddy.rule=HostSNI(`*`)
+      - traefik.tcp.routers.caddy.entrypoints=https
+      - traefik.tcp.routers.caddy.service=caddy
+      - traefik.tcp.routers.caddy.tls.passthrough=true
+#      - traefik.http.routers.caddy.rule=Host(`hristov.blog`) || Host(`www.hristov.blog`)
+#      - traefik.http.routers.caddy.entrypoints=https
+#      - traefik.http.routers.caddy.tls=true
+#      - traefik.http.routers.caddy.tls.certresolver=dns-cloudflare
+#      - traefik.http.routers.caddy.tls.domains[0].main=hristov.blog
+#      - traefik.http.routers.caddy.tls.domains[0].sans=*.hristov.blog
+      - traefik.http.services.caddy.loadbalancer.server.port=443
+      - traefik.http.services.caddy.loadbalancer.server.scheme=https
+    volumes:
+      - .:/app
+      - ./Caddyfile:/etc/caddy/Caddyfile
+  php-fpm:
+    image: php:8.3.9-fpm
+    volumes:
+      - .:/app
+  traefik:
+    image: traefik:v3.2.0
+    depends_on:
+      - caddy
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      CF_DNS_API_TOKEN: ${CLOUDFLARE_AUTH_TOKEN}
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.traefik.rule=Host(`dashboard.hristov.blog`)
+      - traefik.http.routers.traefik.entrypoints=https
+      - traefik.http.routers.traefik.service=api@internal
+      - traefik.http.routers.traefik.tls=true
+      - traefik.http.routers.traefik.tls.certresolver=dns-cloudflare
+      - traefik.http.routers.traefik.tls.domains[0].main=hristov.blog
+      - traefik.http.routers.traefik.tls.domains[0].sans=*.hristov.blog
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik.yaml:/etc/traefik/traefik.yaml:ro
+      - ./traefik-dynamic.yaml:/etc/traefik/dynamic.yaml:ro
+      - ./acme.json:/acme.json
+
+networks:
+  proxy:
+    external: true
