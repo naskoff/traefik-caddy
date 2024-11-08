@@ -26,23 +26,37 @@ entryPoints:
         entryPoint:
           to: https
           scheme: https
+    forwardedHeaders:
+      insecure: true
+      trustedIPs:
+        - 127.0.0.1/32
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+        - 10.0.0.0/8
   https:
     address: ":443"
     http:
       tls:
         domains:
-          - main: hristov.blog
+          - main: softavis.local
             sans:
-              - www.hristov.blog
+              - www.softavis.local
+    forwardedHeaders:
+      insecure: true
+      trustedIPs:
+        - 127.0.0.1/32
+        - 192.168.0.0/16
+        - 172.16.0.0/12
+        - 10.0.0.0/8
     http3: {}
 
-certificatesResolvers:
-  dns-cloudflare:
-    acme:
-      email: about@z-latko.info
-      storage: "/acme.json"
-      dnsChallenge:
-        provider: "cloudflare"
-        resolvers:
-          - "1.1.1.1:53"
-          - "1.0.0.1:53"
+#certificatesResolvers:
+#  dns-cloudflare:
+#    acme:
+#      email: your@email.address
+#      storage: "/acme.json"
+#      dnsChallenge:
+#        provider: "cloudflare"
+#        resolvers:
+#          - "1.1.1.1:53"
+#          - "1.0.0.1:53"

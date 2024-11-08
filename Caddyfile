@@ -2,12 +2,12 @@
     debug
 }
 
-www.hristov.blog {
+{$DOMAIN}:80, www.{$DOMAIN}:80 {
     root * /app/public
 
-    tls {
-        dns cloudflare {env.CLOUDFLARE_AUTH_TOKEN}
-    }
+    #tls {
+    #    dns cloudflare {env.CLOUDFLARE_AUTH_TOKEN}
+    #}
 
     # serve files directly if they can be found (e.g. CSS or JS files in public/)
     encode zstd gzip
